@@ -1,3 +1,4 @@
+//go:build windows
 // +build windows
 
 package systray
@@ -5,6 +6,7 @@ package systray
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -766,12 +768,14 @@ func (t *winTray) iconToBitmap(hIcon windows.Handle) (windows.Handle, error) {
 
 func registerSystray() {
 	if err := wt.initInstance(); err != nil {
-		log.Errorf("Unable to init instance: %v", err)
+		log := fmt.Errorf("Unable to init instance: %v", err)
+		fmt.Println(log)
 		return
 	}
 
 	if err := wt.createMenu(); err != nil {
-		log.Errorf("Unable to create menu: %v", err)
+		log := fmt.Errorf("Unable to create menu: %v", err)
+		fmt.Println(log)
 		return
 	}
 
@@ -797,7 +801,8 @@ func nativeLoop() {
 		// https://msdn.microsoft.com/en-us/library/windows/desktop/ms644936(v=vs.85).aspx
 		switch int32(ret) {
 		case -1:
-			log.Errorf("Error at message loop: %v", err)
+			log := fmt.Errorf("Error at message loop: %v", err)
+			fmt.Println(log)
 			return
 		case 0:
 			return
@@ -838,11 +843,13 @@ func iconBytesToFilePath(iconBytes []byte) (string, error) {
 func SetIcon(iconBytes []byte) {
 	iconFilePath, err := iconBytesToFilePath(iconBytes)
 	if err != nil {
-		log.Errorf("Unable to write icon data to temp file: %v", err)
+		log := fmt.Errorf("Unable to write icon data to temp file: %v", err)
+		fmt.Println(log)
 		return
 	}
 	if err := wt.setIcon(iconFilePath); err != nil {
-		log.Errorf("Unable to set icon: %v", err)
+		log := fmt.Errorf("Unable to set icon: %v", err)
+		fmt.Println(log)
 		return
 	}
 }
@@ -872,28 +879,32 @@ func (item *MenuItem) parentId() uint32 {
 func (item *MenuItem) SetIcon(iconBytes []byte) {
 	iconFilePath, err := iconBytesToFilePath(iconBytes)
 	if err != nil {
-		log.Errorf("Unable to write icon data to temp file: %v", err)
+		log := fmt.Errorf("unable to write icon data to temp file: %v", err)
+		fmt.Println(log)
 		return
 	}
 
 	h, err := wt.loadIconFrom(iconFilePath)
 	if err != nil {
-		log.Errorf("Unable to load icon from temp file: %v", err)
+		log := fmt.Errorf("unable to load icon from temp file: %v", err)
+		fmt.Println(log)
 		return
 	}
 
 	h, err = wt.iconToBitmap(h)
 	if err != nil {
-		log.Errorf("Unable to convert icon to bitmap: %v", err)
+		log := fmt.Errorf("unable to convert icon to bitmap: %v", err)
+		fmt.Println(log)
 		return
 	}
 	wt.muMenuItemIcons.Lock()
-	wt.menuItemIcons[uint32(item.id)] = h
+	wt.menuItemIcons[item.id] = h
 	wt.muMenuItemIcons.Unlock()
 
-	err = wt.addOrUpdateMenuItem(uint32(item.id), item.parentId(), item.title, item.disabled, item.checked)
+	err = wt.addOrUpdateMenuItem(item.id, item.parentId(), item.title, item.disabled, item.checked)
 	if err != nil {
-		log.Errorf("Unable to addOrUpdateMenuItem: %v", err)
+		log := fmt.Errorf("unable to addOrUpdateMenuItem: %v", err)
+		fmt.Println(log)
 		return
 	}
 }
@@ -902,15 +913,17 @@ func (item *MenuItem) SetIcon(iconBytes []byte) {
 // only available on Mac and Windows.
 func SetTooltip(tooltip string) {
 	if err := wt.setTooltip(tooltip); err != nil {
-		log.Errorf("Unable to set tooltip: %v", err)
+		log := fmt.Errorf("unable to set tooltip: %v", err)
+		fmt.Println(log)
 		return
 	}
 }
 
 func addOrUpdateMenuItem(item *MenuItem) {
-	err := wt.addOrUpdateMenuItem(uint32(item.id), item.parentId(), item.title, item.disabled, item.checked)
+	err := wt.addOrUpdateMenuItem(item.id, item.parentId(), item.title, item.disabled, item.checked)
 	if err != nil {
-		log.Errorf("Unable to addOrUpdateMenuItem: %v", err)
+		log := fmt.Errorf("unable to addOrUpdateMenuItem: %v", err)
+		fmt.Println(log)
 		return
 	}
 }
@@ -926,15 +939,17 @@ func (item *MenuItem) SetTemplateIcon(templateIconBytes []byte, regularIconBytes
 func addSeparator(id uint32) {
 	err := wt.addSeparatorMenuItem(id, 0)
 	if err != nil {
-		log.Errorf("Unable to addSeparator: %v", err)
+		log := fmt.Errorf("unable to addSeparator: %v", err)
+		fmt.Println(log)
 		return
 	}
 }
 
 func hideMenuItem(item *MenuItem) {
-	err := wt.hideMenuItem(uint32(item.id), item.parentId())
+	err := wt.hideMenuItem(item.id, item.parentId())
 	if err != nil {
-		log.Errorf("Unable to hideMenuItem: %v", err)
+		log := fmt.Errorf("unable to hideMenuItem: %v", err)
+		fmt.Println(log)
 		return
 	}
 }
