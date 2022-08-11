@@ -1,0 +1,11 @@
+image: archlinux
+secrets:
+  - c668ab04-c304-401f-a794-9b8d4fe581cb # https://github.com/coolavery/systray deploy key
+sources:
+  - https://git.sr.ht/~avery/systray
+tasks:
+ - mirror: |
+     ssh-keyscan github.com > "$HOME"/.ssh/known_hosts
+     cd systray
+     git remote add github git@github.com:coolavery/systray.git
+     git push --prune github +refs/remotes/origin/*:refs/heads/* +refs/tags/*:refs/tags/* main
