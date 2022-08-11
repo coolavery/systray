@@ -1,6 +1,14 @@
+**Forked from: https://github.com/getlantern/systray**
+
+Main changes:
+
+- Remove libayatana-appindicator for Linux build
+- Remove github.com/getlantern/golog dependency
+
+---
+
 systray is a cross-platform Go library to place an icon and menu in the notification area.
 
-**Forked from: https://github.com/getlantern/systray**
 
 ## Features
 
